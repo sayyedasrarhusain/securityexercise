@@ -1,29 +1,27 @@
 package com.example.securityexercise.controller;
 
-import com.example.securityexercise.client.GitApiClient;
 import com.example.securityexercise.model.Event;
-import com.example.securityexercise.model.ReadmePayload;
+import com.example.securityexercise.model.enums.ActionType;
+import com.example.securityexercise.service.GitService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import java.net.URI;
 
 @RestController
+@Slf4j
 public class GitWebHookController {
+
     @Autowired
-    GitApiClient gitClient;
+    private GitService readmeService;
 
     @PostMapping("/")
     public void eventHandler(@RequestBody Event event) {
-        URI baseUrl = URI.create(event.getRepository().getUrl() + "/contents");
-        ReadmePayload payload = ReadmePayload.builder()
-                .name("README.md")
-                .message("Creating Readme.md")
-                .content("Initial readme for " + event.getRepository().getName())
-                .build();
-
-        gitClient.createReadme(baseUrl, payload);
+        log.info("Received event: " + event);
+        if (event.getAction() == ActionType.created) {
+            readmeService.createReadme(event.getRepository().getUrl(), event.getRepository().getName());
+        }
 
     }
 }
