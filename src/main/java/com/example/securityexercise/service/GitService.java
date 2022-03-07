@@ -1,6 +1,8 @@
 package com.example.securityexercise.service;
 
 import com.example.securityexercise.client.GitApiClient;
+import com.example.securityexercise.model.IssuePayload;
+import com.example.securityexercise.model.ProtectionPayload;
 import com.example.securityexercise.model.ReadmePayload;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +39,20 @@ public class GitService {
     }
 
     public void protectMasterBranch(String repoUrl) {
-
+        URI baseUrl = URI.create( repoUrl + "/branches/master");
+        ProtectionPayload payload = new ProtectionPayload();
+        gitClient.protectBranch(baseUrl, auth, payload);
+        log.info("Protections applied to master branch for repo : " + repoUrl);
     }
 
     public void notify(String repoUrl) {
-
+        IssuePayload payload = IssuePayload.builder()
+                .title("Create Restrictions on Master Branch")
+                .body("@asrarhusain \n New restrictions added to master branch for repo " +repoUrl)
+                .assignee("asrarhusain")
+                .build();
+        URI baseUrl = URI.create( repoUrl );
+        gitClient.createIssue(baseUrl, auth, payload);
+        log.info("Created issue in : " + repoUrl);
     }
 }

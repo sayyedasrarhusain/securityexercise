@@ -14,13 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class GitWebHookController {
 
     @Autowired
-    private GitService readmeService;
+    private GitService gitService;
 
     @PostMapping("/")
     public void eventHandler(@RequestBody Event event) {
         log.info("Received event: " + event);
         if (event.getAction() == ActionType.created) {
-            readmeService.createReadme(event.getRepository().getUrl(), event.getRepository().getName());
+            gitService.createReadme(event.getRepository().getUrl(), event.getRepository().getName());
+            gitService.protectMasterBranch(event.getRepository().getUrl());
+            gitService.notify(event.getRepository().getUrl());
         }
 
     }
